@@ -65,8 +65,11 @@ class CustomDatetimeBasedCursor(DatetimeBasedCursor):
     }
     To adopt this change to the LowCode CDK, this issue was created - https://github.com/airbytehq/airbyte/issues/25008.
     """
-
     def close_slice(self, stream_slice: StreamSlice, most_recent_record: typing.Optional[Record]) -> None:
+        cursor_field_value = self.cursor_field
+        if not isinstance(self.cursor_field, str):
+            cursor_field_value = self.cursor_field.eval(self.config)
+
         super(CustomDatetimeBasedCursor, self).close_slice(
             stream_slice=stream_slice,
             most_recent_record=LastRecordDictProxy(most_recent_record, {self.cursor_field.eval(self.config): "MetaData/LastUpdatedTime"}),
